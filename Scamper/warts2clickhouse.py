@@ -7,12 +7,10 @@ Reads warts files and loads measurement data into ClickHouse database
 import sys
 import argparse
 import logging
-from datetime import datetime
-from typing import List, Dict, Any, Optional
 import ipaddress
 
 try:
-    from scamper import ScamperFile, ScamperPing, ScamperTrace
+    from scamper import ScamperFile, ScamperPing, ScamperTrace, ScamperHost
     from clickhouse_driver import Client
 except ImportError as e:
     print(f"Missing required dependencies: {e}")
@@ -25,6 +23,7 @@ class WartsClickHouseLoader:
         self.ping_batch = []
         self.trace_batch = []
         self.trace_hops_batch = []
+        self.dns_batch = []
         self.batch_size = 1000
 
         logging.basicConfig(level=logging.INFO)
@@ -109,10 +108,31 @@ class WartsClickHouseLoader:
             self.logger.warning(f"Error processing traceroute {trace.dst}: {e}")
             # Continue processing other traces
 
-    # DNS measurements not supported in current scamper Python library
-    # def process_dns(self, dns):
-    #     """Process DNS measurement - NOT IMPLEMENTED"""
-    #     pass
+    def process_dns(self, dns: ScamperHost):
+        """Process DNS measurement"""
+        try:
+            # Check if we have valid DNS data
+            if dns.rtt is None:
+                return
+
+            dns_data = {
+                'timestamp': dns.start,
+                'measurement_id': f"dns_{dns.start.timestamp()}_{hash(str(dns.dst))}",
+                'query_name': dns.qname,
+                'query_type': dns.qtype,
+                'nameserver': self.normalize_ip(dns.dst),
+                'response_code': dns.rcode_num,
+                'rtt': dns.rtt.total_seconds() * 1000 if dns.rtt is not None else 0.0,
+                'answer_count': dns.ancount,
+                'authority_count': dns.nscount,
+                'additional_count': dns.arcount,
+            }
+            self.dns_batch.append(dns_data)
+
+        except Exception as e:
+            self.logger.warning(f"Error processing dns {dns.dst}: {e}")
+            # Continue processing other dns
+
 
     def flush_batches(self):
         """Insert accumulated batches into ClickHouse"""
@@ -141,6 +161,13 @@ class WartsClickHouseLoader:
                 self.logger.info(f"Inserted {len(self.trace_hops_batch)} traceroute hops")
                 self.trace_hops_batch.clear()
 
+            if self.dns_batch:
+                self.client.execute(
+                    'INSERT INTO dns_measurements VALUES',
+                    self.dns_batch
+                )
+                self.logger.info(f"Inserted {len(self.dns_batch)} dns measurements")
+                self.dns_batch.clear()
 
         except Exception as e:
             self.logger.error(f"Error inserting data: {e}")
@@ -157,11 +184,12 @@ class WartsClickHouseLoader:
                         self.process_ping(obj)
                     elif isinstance(obj, ScamperTrace):
                         self.process_traceroute(obj)
-                    # DNS measurements not supported in current scamper Python library
+                    elif isinstance(obj, ScamperHost):
+                        self.process_dns(obj)
 
                     # Flush batches when they get large
                     total_items = (len(self.ping_batch) + len(self.trace_batch) +
-                                 len(self.trace_hops_batch))
+                                 len(self.trace_hops_batch) + len(self.dns_batch))
                     if total_items >= self.batch_size:
                         self.flush_batches()
 

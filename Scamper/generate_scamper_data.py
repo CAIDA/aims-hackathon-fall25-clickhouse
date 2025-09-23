@@ -26,14 +26,14 @@ def probe(method, mux, target):
 
     # Connect to scamper daemon and attach output file
     with ScamperCtrl(mux=mux, outfile=outfile) as ctrl:
-        ctrl.add_vps(ctrl.vps())
+        ctrl.add_vps([vp for vp in ctrl.vps() if 'primitive:dns' in vp.tags])
         for inst in ctrl.instances():
             if method == "ping":
                 ctrl.do_ping(target, inst=inst)
             elif method == "trace":
                 ctrl.do_trace(target, inst=inst)
             elif method == "dns":
-                ctrl.do_dns(target, inst=inst)
+                ctrl.do_dns('www.caida.org', server=target, inst=inst)
 
             # Wait for response
             for o in ctrl.responses(timeout=timedelta(seconds=10)):
@@ -46,7 +46,7 @@ def probe(method, mux, target):
                 elif isinstance(o, ScamperTrace):
                     print(f"Trace data received from {inst.name} ({inst.ipv4}) to {target}")
                 elif isinstance(o, ScamperHost):
-                    print(f"DNS data received from {inst.name} ({inst.ipv4}) to {target}")
+                    print(f"DNS data received from {inst.name} ({inst.ipv4}) using resolver {target}")
                 break
             else:
                 print(f"Timeout: No response from {inst.name} ({inst.ipv4}) to {target}")
@@ -58,7 +58,7 @@ def probe(method, mux, target):
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Simple scamper ping/trace measurement with data saving"
+        description="Simple scamper ping/trace/DNS measurement with data saving"
     )
     parser.add_argument("mux", help="Path to scamper mux socket")
     parser.add_argument("method", choices=["ping", "trace", "dns"], help="Measurement method")
