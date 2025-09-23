@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """
 Simple mock data generator that directly inserts into ClickHouse
-无需依赖scamper或warts2clickhouse，直接生成模拟数据用于演示
 """
 
 import random
@@ -11,26 +10,26 @@ from datetime import datetime, timedelta, timezone
 try:
     from clickhouse_driver import Client
 except ImportError:
-    print("缺少依赖: clickhouse-driver")
-    print("安装方法: pip install clickhouse-driver")
+    print("Lacking required dependencies: clickhouse-driver")
+    print("Install with: pip install clickhouse-driver")
     sys.exit(1)
 
 
 def generate_simple_mock_data():
-    """生成简单的模拟数据并直接插入ClickHouse"""
+    """Generate simple mock data and insert directly into ClickHouse"""
 
     # 连接ClickHouse
     try:
         client = Client(host='localhost', port=9000)
         # 测试连接
         client.execute('SELECT 1')
-        print("✅ ClickHouse连接成功")
+        print("✅ ClickHouse connection successful")
     except Exception as e:
-        print(f"❌ ClickHouse连接失败: {e}")
-        print("请确保ClickHouse正在运行: docker ps | grep clickhouse")
+        print(f"❌ ClickHouse connection failed: {e}")
+        print("Please ensure ClickHouse is running: docker ps | grep clickhouse")
         return False
 
-    # 目标地址
+    # Target addresses
     targets = [
         "::ffff:8.8.8.8",        # Google DNS (IPv4-mapped)
         "::ffff:1.1.1.1",        # Cloudflare DNS
@@ -47,20 +46,20 @@ def generate_simple_mock_data():
         "example.org"
     ]
 
-    # 生成最近24小时的数据 (使用UTC时间)
+    # Generate data for the last 24 hours (using UTC time)
     base_time = datetime.now(timezone.utc) - timedelta(hours=24)
     print(base_time)
 
-    print("📊 开始生成模拟数据...")
+    print("📊 Starting to generate mock data...")
 
-    # 生成ping测量数据
+    # Generate ping measurement data
     ping_data = []
     for hour in range(24):
-        for minute in range(0, 60, 10):  # 每10分钟
+        for minute in range(0, 60, 10):  # Every 10 minutes
             timestamp = base_time + timedelta(hours=hour, minutes=minute)
 
             for target in targets:
-                # 模拟RTT数据
+                # Simulate RTT data
                 base_rtt = random.uniform(10, 80)
                 variation = random.uniform(0.8, 1.2)
 
@@ -78,18 +77,18 @@ def generate_simple_mock_data():
                 )
                 ping_data.append(ping_record)
 
-    # 生成traceroute测量数据
+    # Generate traceroute measurement data
     trace_data = []
     trace_hops_data = []
-    for hour in range(0, 24, 2):  # 每2小时
-        for minute in range(0, 60, 30):  # 每30分钟
+    for hour in range(0, 24, 2):  # Every 2 hours
+        for minute in range(0, 60, 30):  # Every 30 minutes
             timestamp = base_time + timedelta(hours=hour, minutes=minute)
 
-            for target in targets[:2]:  # 只对前两个目标做traceroute
+            for target in targets[:2]:  # Only do traceroute for the first two targets
                 measurement_id = f"trace_{int(timestamp.timestamp())}_{hash(target)}"
                 hop_count = random.randint(8, 15)
 
-                # 主traceroute记录
+                # Main traceroute record
                 trace_record = (
                     timestamp,                                          # timestamp
                     measurement_id,                                     # measurement_id
@@ -100,9 +99,9 @@ def generate_simple_mock_data():
                 )
                 trace_data.append(trace_record)
 
-                # 逐跳记录
+                # Each hop record
                 for hop_num in range(1, hop_count + 1):
-                    # 生成模拟的hop地址
+                    # Generate simulated hop address
                     hop_addr = f"::ffff:10.{random.randint(1,255)}.{random.randint(1,255)}.{random.randint(1,255)}"
 
                     hop_record = (
@@ -119,12 +118,12 @@ def generate_simple_mock_data():
                     )
                     trace_hops_data.append(hop_record)
 
-    # 生成DNS测量数据
+    # Generate DNS measurement data
     dns_data = []
     nameservers = ["::ffff:8.8.8.8", "::ffff:1.1.1.1", "2001:4860:4860::8888"]
 
-    for hour in range(0, 24, 3):  # 每3小时
-        for minute in range(0, 60, 20):  # 每20分钟
+    for hour in range(0, 24, 3):  # Every 3 hours
+        for minute in range(0, 60, 20):  # Every 20 minutes
             timestamp = base_time + timedelta(hours=hour, minutes=minute)
 
             for domain in domains:
@@ -143,72 +142,72 @@ def generate_simple_mock_data():
                     )
                     dns_data.append(dns_record)
 
-    # 插入数据到ClickHouse
+    # Insert data into ClickHouse
     try:
-        # 插入ping数据
+        # Insert ping data
         if ping_data:
             client.execute(
                 'INSERT INTO ping_measurements VALUES',
                 ping_data
             )
-            print(f"✅ 插入了 {len(ping_data)} 条ping测量记录")
+            print(f"✅ Inserted {len(ping_data)} ping measurement records")
 
-        # 插入traceroute主记录
+        # Insert traceroute main record
         if trace_data:
             client.execute(
                 'INSERT INTO traceroute_measurements VALUES',
                 trace_data
             )
-            print(f"✅ 插入了 {len(trace_data)} 条traceroute测量记录")
+            print(f"✅ Inserted {len(trace_data)} traceroute measurement records")
 
-        # 插入traceroute hop记录
+        # Insert traceroute hop record
         if trace_hops_data:
             client.execute(
                 'INSERT INTO traceroute_hops VALUES',
                 trace_hops_data
             )
-            print(f"✅ 插入了 {len(trace_hops_data)} 条traceroute hop记录")
+            print(f"✅ Inserted {len(trace_hops_data)} traceroute hop records")
 
-        # 插入DNS数据
+        # Insert DNS data
         if dns_data:
             client.execute(
                 'INSERT INTO dns_measurements VALUES',
                 dns_data
             )
-            print(f"✅ 插入了 {len(dns_data)} 条DNS测量记录")
+            print(f"✅ Inserted {len(dns_data)} DNS measurement records")
 
-        print(f"\n🎉 模拟数据生成完成!")
-        print(f"📊 总计生成了 {len(ping_data) + len(trace_data) + len(trace_hops_data) + len(dns_data)} 条记录")
+        print(f"\n🎉 Mock data generation completed!")
+        print(f"📊 Total records generated: {len(ping_data) + len(trace_data) + len(trace_hops_data) + len(dns_data)}")
 
-        # 验证数据
+        # Verify data
         ping_count = client.execute('SELECT count() FROM ping_measurements')[0][0]
         trace_count = client.execute('SELECT count() FROM traceroute_measurements')[0][0]
         dns_count = client.execute('SELECT count() FROM dns_measurements')[0][0]
 
-        print(f"\n📈 数据库中的记录统计:")
-        print(f"  Ping测量: {ping_count} 条")
-        print(f"  Traceroute测量: {trace_count} 条")
-        print(f"  DNS测量: {dns_count} 条")
+        print(f"\n📈 Record statistics in the database:")
+        print(f"  Ping measurement: {ping_count} records")
+        print(f"  Traceroute measurement: {trace_count} records")
+        print(f"  DNS measurement: {dns_count} records")
 
-        print(f"\n🌐 访问链接:")
-        print(f"  ClickHouse查询界面: http://localhost:8123/play")
-        print(f"  Grafana仪表板: http://localhost:3000 (admin/admin)")
+        print(f"\n🌐 Access links:")
+        print(f"  ClickHouse query interface: http://localhost:8123/play")
+        print(f"  Grafana dashboard: http://localhost:3000 (admin/admin)")
 
         return True
 
     except Exception as e:
-        print(f"❌ 数据插入失败: {e}")
+        print(f"❌ Data insertion failed: {e}")
         return False
 
 
 if __name__ == '__main__':
-    print("🎲 生成简单模拟数据用于演示...")
-    print("📝 注意: 这是模拟数据，不是真实的网络测量数据")
+    print("🎲 Generating simple mock data for demonstration...")
+    print("📝 Note: This is mock data, not real network measurement data")
     print()
 
     success = generate_simple_mock_data()
 
     if success:
-        print("\n✅ 数据生成成功! 现在可以在Grafana中查看可视化结果了。")
+        print("\n✅ Data generation successful! Now you can view the visual results in Grafana.")
     else:
-        print("\n❌ 数据生成失败，请检查ClickHouse是否正在运行。")
+        print("\n❌ Data generation failed, please check if ClickHouse is running.")
