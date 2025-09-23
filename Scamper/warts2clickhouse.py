@@ -53,6 +53,7 @@ class WartsClickHouseLoader:
             ping_data = {
                 'timestamp': ping.start,
                 'measurement_id': f"ping_{ping.start.timestamp()}_{hash(str(ping.dst))}",
+                'vp': ping.list.monitor,
                 'source': self.normalize_ip(ping.src),
                 'destination': self.normalize_ip(ping.dst),
                 'rtt_avg': ping.avg_rtt.total_seconds() * 1000 if ping.avg_rtt else 0.0,
@@ -79,6 +80,7 @@ class WartsClickHouseLoader:
             trace_data = {
                 'timestamp': trace.start,
                 'measurement_id': f"trace_{trace.start.timestamp()}_{hash(str(trace.dst))}",
+                'vp': trace.list.monitor,
                 'source': self.normalize_ip(trace.src),
                 'destination': self.normalize_ip(trace.dst),
                 'hop_count': trace.hop_count,
@@ -118,6 +120,7 @@ class WartsClickHouseLoader:
             dns_data = {
                 'timestamp': dns.start,
                 'measurement_id': f"dns_{dns.start.timestamp()}_{hash(str(dns.dst))}",
+                'vp': dns.list.monitor,
                 'query_name': dns.qname,
                 'query_type': dns.qtype,
                 'nameserver': self.normalize_ip(dns.dst),
