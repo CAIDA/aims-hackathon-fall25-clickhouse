@@ -9,7 +9,7 @@ Example: ./generate_scamper_data.py /run/ark/mux trace 192.172.226.122
 
 import argparse
 from datetime import datetime, timedelta
-from scamper import ScamperCtrl, ScamperFile, ScamperPing, ScamperTrace
+from scamper import ScamperCtrl, ScamperFile, ScamperPing, ScamperTrace, ScamperHost
 
 
 def probe(method, mux, target):
@@ -32,6 +32,8 @@ def probe(method, mux, target):
                 ctrl.do_ping(target, inst=inst)
             elif method == "trace":
                 ctrl.do_trace(target, inst=inst)
+            elif method == "dns":
+                ctrl.do_dns(target, inst=inst)
 
             # Wait for response
             for o in ctrl.responses(timeout=timedelta(seconds=10)):
@@ -43,6 +45,8 @@ def probe(method, mux, target):
                         print(f"No response from {inst.name} ({inst.ipv4}) to {target}")
                 elif isinstance(o, ScamperTrace):
                     print(f"Trace data received from {inst.name} ({inst.ipv4}) to {target}")
+                elif isinstance(o, ScamperHost):
+                    print(f"DNS data received from {inst.name} ({inst.ipv4}) to {target}")
                 break
             else:
                 print(f"Timeout: No response from {inst.name} ({inst.ipv4}) to {target}")
@@ -57,7 +61,7 @@ def main():
         description="Simple scamper ping/trace measurement with data saving"
     )
     parser.add_argument("mux", help="Path to scamper mux socket")
-    parser.add_argument("method", choices=["ping", "trace"], help="Measurement method")
+    parser.add_argument("method", choices=["ping", "trace", "dns"], help="Measurement method")
     parser.add_argument("target", help="Target IP address")
 
     args = parser.parse_args()
