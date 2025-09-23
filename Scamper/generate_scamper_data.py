@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 
 """
-Simple scamper ping/trace measurement with data saving
+Simple scamper ping/trace/dns measurement with data saving
 Usage: ./generate_scamper_data.py MUX METHOD TARGET_IP
 Example: ./generate_scamper_data.py /run/ark/mux ping 192.172.226.122
 Example: ./generate_scamper_data.py /run/ark/mux trace 192.172.226.122
+Example: ./generate_scamper_data.py /run/ark/mux dns 1.1.1.1
 """
 
 import argparse
@@ -58,7 +59,7 @@ def probe(method, mux, target):
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Simple scamper ping/trace/DNS measurement with data saving"
+        description="Simple scamper ping/trace/dns measurement with data saving"
     )
     parser.add_argument("mux", help="Path to scamper mux socket")
     parser.add_argument("method", choices=["ping", "trace", "dns"], help="Measurement method")
