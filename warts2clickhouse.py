@@ -84,7 +84,7 @@ class WartsClickHouseLoader:
                 'source': self.normalize_ip(trace.src),
                 'destination': self.normalize_ip(trace.dst),
                 'hop_count': trace.hop_count,
-                'completed': 1 if trace.complete else 0
+                'completed': 1 if trace.stop_reason_str == "completed" else 0
             }
             self.trace_batch.append(trace_data)
 
@@ -99,7 +99,7 @@ class WartsClickHouseLoader:
                     'source': self.normalize_ip(trace.src),
                     'destination': self.normalize_ip(trace.dst),
                     'hop_number': hop_num,
-                    'hop_address': self.normalize_ip(hop.addr) if hop.addr else None,
+                    'hop_address': self.normalize_ip(hop.addr) if hasattr(hop, 'addr') and hop.addr else None,
                     'rtt': hop.rtt.total_seconds() * 1000 if hop.rtt is not None else 0.0,
                     'probe_ttl': hop.probe_ttl,
                     'icmp_type': hop.icmp_type,
