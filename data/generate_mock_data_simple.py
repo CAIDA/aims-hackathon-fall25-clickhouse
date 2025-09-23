@@ -18,10 +18,10 @@ except ImportError:
 def generate_simple_mock_data():
     """Generate simple mock data and insert directly into ClickHouse"""
 
-    # 连接ClickHouse
+    # Connect to ClickHouse
     try:
         client = Client(host='localhost', port=9000, database='scamper')
-        # 测试连接
+        # Test connection
         client.execute('SELECT 1')
         print("✅ ClickHouse connection successful")
     except Exception as e:
