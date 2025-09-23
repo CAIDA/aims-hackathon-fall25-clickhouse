@@ -98,7 +98,6 @@ class WartsClickHouseLoader:
                     'source': self.normalize_ip(trace.src),
                     'destination': self.normalize_ip(trace.dst),
                     'hop_number': hop_num,
-                    'hop_address': self.normalize_ip(hop.addr) if hasattr(hop, 'addr') and hop.addr else None,
                     'rtt': hop.rtt.total_seconds() * 1000 if hop.rtt is not None else 0.0,
                     'probe_ttl': hop.probe_ttl,
                     'icmp_type': hop.icmp_type,

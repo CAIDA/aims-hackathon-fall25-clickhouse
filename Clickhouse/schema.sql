@@ -41,7 +41,6 @@ CREATE TABLE IF NOT EXISTS traceroute_hops (
     source IPv6,
     destination IPv6,
     hop_number UInt8,
-    hop_address Nullable(IPv6),
     rtt Float32,
     probe_ttl UInt8,
     icmp_type Nullable(UInt8),
