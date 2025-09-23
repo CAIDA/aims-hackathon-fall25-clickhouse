@@ -7,6 +7,9 @@ echo "🚀 Setting up Scamper to ClickHouse pipeline..."
 
 # Install Python dependencies
 echo "📦 Installing Python dependencies..."
+python3 -m venv clickhouse_env
+source clickhouse_env/bin/activate
+
 pip install -r requirements.txt
 
 # Start Docker containers
@@ -37,3 +40,4 @@ echo "    ./warts2clickhouse.py your_file.warts"
 echo "  Option B - Generate test data:"
 echo "    ./generate_mock_data.py"
 echo "  Then view the dashboard in Grafana: http://localhost:3000"
+deactive

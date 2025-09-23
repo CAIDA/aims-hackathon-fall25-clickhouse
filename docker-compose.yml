@@ -26,15 +26,22 @@ services:
   grafana:
     image: grafana/grafana:latest
     container_name: scamper-grafana
+    user: '0'
     ports:
       - "3000:3000"
     environment:
-      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_SECURITY_ADMIN_PASSWORD: hackathon-admin
       GF_INSTALL_PLUGINS: grafana-clickhouse-datasource
+      GF_SERVER_CERT_FILE: /etc/grafana/ssl/fullchain.cert
+      GF_SERVER_CERT_KEY: /etc/grafana/ssl/privkey.key
+      GF_SERVER_PROTOCOL: https
+
     volumes:
       - grafana_data:/var/lib/grafana
       - ./grafana/provisioning:/etc/grafana/provisioning
       - ./grafana/dashboards:/var/lib/grafana/dashboards
+      - /etc/letsencrypt/archive/clickhouse.rabbitsspeedtest.site/fullchain1.pem:/etc/grafana/ssl/fullchain.cert
+      - /etc/letsencrypt/archive/clickhouse.rabbitsspeedtest.site/privkey1.pem:/etc/grafana/ssl/privkey.key
     depends_on:
       clickhouse:
         condition: service_healthy
