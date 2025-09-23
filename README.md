@@ -39,25 +39,31 @@ python Clickhouse/warts2clickhouse.py *.warts
 
 ```
 AIMS-18/
-├── Clickhouse/                  
-    ├── clickhouse-config.xml        # Clickhouse configuration
-    └── schema.sql                   # Clickhouse table schemas
-├── data/                  
-    ├── generate_mock_data_simple.py # Generate mock test data and insert into Clickhouse
-    ├── ping_192.172.226.122.json    # Example file converted to json (sc_warts2json)
-    └── ping_192.172.226.122.warts   # Example warts file
-├── docker-compose.yml               # Docker services configuration
-├── Grafana/                    
-    └── provisioning/
-        └── datasources/
-            └── clickhouse.yml       # Grafana datasource configuration
-├── README.md                        # Project overview (this file)
+├── Clickhouse/
+│   ├── clickhouse-config.xml        # ClickHouse configuration
+│   └── schema.sql                   # Table schema definitions
+│
+├── data/
+│   ├── generate_mock_data_simple.py # Generate mock test data and insert into ClickHouse
+│   ├── ping_192.172.226.122.json    # Sample JSON (converted with sc_warts2json)
+│   └── ping_192.172.226.122.warts   # Sample warts file
+│
+├── docker-compose.yml               # Docker services configuration (ClickHouse, Grafana, etc.)
+│
+├── Grafana/
+│   └── provisioning/
+│       └── datasources/
+│           └── clickhouse.yml       # Grafana ClickHouse datasource setup
+│
+├── README.md                        # Project overview and usage instructions
 ├── requirements.txt                 # Python dependencies
-├── Scamper/                  
-    ├── warts2clickhouse.py          # Core: warts file processor
-    └── generate_scamper_data.py     # Generate real scamper measurements
-└── setup.sh                         # One-click environment setup
-``
+│
+├── Scamper/
+│   ├── warts2clickhouse.py          # Core script: parses warts and inserts into ClickHouse
+│   └── generate_scamper_data.py     # Generate real Scamper measurement data
+│
+└── setup.sh                         # One-click environment setup script
+```
 
 ## 🗄️ Data Architecture
 
