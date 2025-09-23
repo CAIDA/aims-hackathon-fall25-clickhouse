@@ -8,6 +8,7 @@ USE scamper;
 CREATE TABLE IF NOT EXISTS ping_measurements (
     timestamp DateTime64(3),
     measurement_id String,
+    vp String,
     source IPv6,
     destination IPv6,
     rtt_avg Float32,
@@ -25,6 +26,7 @@ SETTINGS index_granularity = 8192;
 CREATE TABLE IF NOT EXISTS traceroute_measurements (
     timestamp DateTime64(3),
     measurement_id String,
+    vp String,
     source IPv6,
     destination IPv6,
     hop_count UInt8,
@@ -54,6 +56,7 @@ SETTINGS index_granularity = 8192;
 CREATE TABLE IF NOT EXISTS dns_measurements (
     timestamp DateTime64(3),
     measurement_id String,
+    vp String,
     query_name String,
     query_type String,
     nameserver IPv6,
