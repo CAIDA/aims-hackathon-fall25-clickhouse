@@ -25,7 +25,7 @@ done
 # Create database schema
 echo "🗄️  Creating database tables..."
 echo "Executing schema.sql..."
-docker exec scamper-clickhouse clickhouse-client --query "$(cat schema.sql)"
+docker exec scamper-clickhouse clickhouse-client --query "$(cat Clickhouse/schema.sql)"
 echo "✅ Database tables created!"
 
 echo "✅ Setup complete!"
@@ -36,8 +36,8 @@ echo "  - Grafana: http://localhost:3000 (admin/admin)"
 echo ""
 echo "📊 Next steps:"
 echo "  Option A - Process real data:"
-echo "    ./warts2clickhouse.py your_file.warts"
+echo "    python Scamper/warts2clickhouse.py your_file.warts"
 echo "  Option B - Generate test data:"
-echo "    ./generate_mock_data.py"
+echo "    python data/generate_mock_data_simple.py"
 echo "  Then view the dashboard in Grafana: http://localhost:3000"
 deactive

@@ -1,7 +1,11 @@
 -- ClickHouse schema for scamper measurements
 
+-- Create (if needed) and use the Scamper database
+CREATE DATABASE IF NOT EXISTS scamper;
+USE scamper;
+
 -- Ping measurements table
-CREATE TABLE ping_measurements (
+CREATE TABLE IF NOT EXISTS ping_measurements (
     timestamp DateTime64(3),
     measurement_id String,
     source IPv6,
@@ -18,7 +22,7 @@ ORDER BY (timestamp, destination)
 SETTINGS index_granularity = 8192;
 
 -- Traceroute measurements table
-CREATE TABLE traceroute_measurements (
+CREATE TABLE IF NOT EXISTS traceroute_measurements (
     timestamp DateTime64(3),
     measurement_id String,
     source IPv6,
@@ -31,7 +35,7 @@ ORDER BY (timestamp, destination)
 SETTINGS index_granularity = 8192;
 
 -- Traceroute hops table (detailed hop information)
-CREATE TABLE traceroute_hops (
+CREATE TABLE IF NOT EXISTS traceroute_hops (
     timestamp DateTime64(3),
     measurement_id String,
     source IPv6,
@@ -48,7 +52,7 @@ ORDER BY (timestamp, destination, hop_number)
 SETTINGS index_granularity = 8192;
 
 -- DNS measurements table (for RFC2182 analysis)
-CREATE TABLE dns_measurements (
+CREATE TABLE IF NOT EXISTS dns_measurements (
     timestamp DateTime64(3),
     measurement_id String,
     query_name String,
@@ -65,7 +69,7 @@ ORDER BY (timestamp, query_name)
 SETTINGS index_granularity = 8192;
 
 -- Create views for common analytics queries
-CREATE VIEW ping_stats AS
+CREATE VIEW IF NOT EXISTS ping_stats AS
 SELECT
     toStartOfHour(timestamp) as hour,
     destination,
@@ -77,7 +81,7 @@ SELECT
 FROM ping_measurements
 GROUP BY hour, destination;
 
-CREATE VIEW dns_robustness AS
+CREATE VIEW IF NOT EXISTS dns_robustness AS
 SELECT
     toStartOfDay(timestamp) as day,
     query_name,

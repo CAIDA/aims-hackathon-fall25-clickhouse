@@ -16,13 +16,12 @@ try:
     from clickhouse_driver import Client
 except ImportError as e:
     print(f"Missing required dependencies: {e}")
-    print("Install with: pip install scamper clickhouse-driver")
     sys.exit(1)
 
 
 class WartsClickHouseLoader:
-    def __init__(self, clickhouse_host: str = 'localhost', clickhouse_port: int = 9000):
-        self.client = Client(host=clickhouse_host, port=clickhouse_port)
+    def __init__(self, clickhouse_host: str = 'localhost', clickhouse_port: int = 9000, clickhouse_database: str = 'scamper'):
+        self.client = Client(host=clickhouse_host, port=clickhouse_port, database=clickhouse_database)
         self.ping_batch = []
         self.trace_batch = []
         self.trace_hops_batch = []
@@ -84,7 +83,7 @@ class WartsClickHouseLoader:
                 'source': self.normalize_ip(trace.src),
                 'destination': self.normalize_ip(trace.dst),
                 'hop_count': trace.hop_count,
-                'completed': 1 if trace.complete else 0
+                'completed': 1 if trace.stop_reason_str == "completed" else 0
             }
             self.trace_batch.append(trace_data)
 
@@ -99,7 +98,7 @@ class WartsClickHouseLoader:
                     'source': self.normalize_ip(trace.src),
                     'destination': self.normalize_ip(trace.dst),
                     'hop_number': hop_num,
-                    'hop_address': self.normalize_ip(hop.addr) if hop.addr else None,
+                    'hop_address': self.normalize_ip(hop.addr) if hasattr(hop, 'addr') and hop.addr else None,
                     'rtt': hop.rtt.total_seconds() * 1000 if hop.rtt is not None else 0.0,
                     'probe_ttl': hop.probe_ttl,
                     'icmp_type': hop.icmp_type,
