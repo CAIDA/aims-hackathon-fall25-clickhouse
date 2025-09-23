@@ -21,14 +21,14 @@ pip install -r requirements.txt
 
 **Option A: Mock Data (Quick Demo)**
 ```bash
-./generate_mock_data_simple.py
+python data/generate_mock_data_simple.py
 ```
 
 **Option B: Real Scamper Data**
 ```bash
 # Requires scamper daemon running
-./generate_scamper_data.py /var/run/scamper 8.8.8.8
-./warts2clickhouse.py *.warts
+python Scamper/generate_scamper_data.py /var/run/scamper 8.8.8.8
+python Clickhouse/warts2clickhouse.py *.warts
 ```
 
 ### Step 3: View Results
@@ -39,19 +39,25 @@ pip install -r requirements.txt
 
 ```
 AIMS-18/
-├── README.md                    # Project overview (this file)
-├── setup.sh                    # One-click environment setup
-├── docker-compose.yml          # Docker services configuration
-├── schema.sql                  # ClickHouse table schemas
-├── warts2clickhouse.py         # Core: warts file processor
-├── generate_mock_data_simple.py # Generate mock test data
-├── generate_scamper_data.py    # Generate real scamper measurements
-├── requirements.txt            # Python dependencies
-└── grafana/                    # Grafana datasource configuration
+├── Clickhouse/                  
+    ├── clickhouse-config.xml        # Clickhouse configuration
+    └── schema.sql                   # Clickhouse table schemas
+├── data/                  
+    ├── generate_mock_data_simple.py # Generate mock test data and insert into Clickhouse
+    ├── ping_192.172.226.122.json    # Example file converted to json (sc_warts2json)
+    └── ping_192.172.226.122.warts   # Example warts file
+├── docker-compose.yml               # Docker services configuration
+├── Grafana/                    
     └── provisioning/
         └── datasources/
-            └── clickhouse.yml
-```
+            └── clickhouse.yml       # Grafana datasource configuration
+├── README.md                        # Project overview (this file)
+├── requirements.txt                 # Python dependencies
+├── Scamper/                  
+    ├── warts2clickhouse.py          # Core: warts file processor
+    └── generate_scamper_data.py     # Generate real scamper measurements
+└── setup.sh                         # One-click environment setup
+``
 
 ## 🗄️ Data Architecture
 
@@ -123,7 +129,7 @@ curl "http://localhost:8123/?query=SELECT count() FROM ping_measurements"
 - **Database**: ClickHouse (Columnar storage)
 - **Visualization**: Grafana
 - **Deployment**: Docker + Docker Compose
-- **Language**: Python 3.7+
+- **Language**: Python 3.8+
 
 ## 📚 Common Operations
 

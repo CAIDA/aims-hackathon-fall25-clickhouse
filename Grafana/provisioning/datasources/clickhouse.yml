@@ -10,5 +10,5 @@ datasources:
       server: clickhouse
       port: 8123
       protocol: http
-      defaultDatabase: default
+      defaultDatabase: scamper
     isDefault: true

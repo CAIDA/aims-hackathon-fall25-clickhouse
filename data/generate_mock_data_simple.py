@@ -20,7 +20,7 @@ def generate_simple_mock_data():
 
     # 连接ClickHouse
     try:
-        client = Client(host='localhost', port=9000)
+        client = Client(host='localhost', port=9000, database='scamper')
         # 测试连接
         client.execute('SELECT 1')
         print("✅ ClickHouse connection successful")

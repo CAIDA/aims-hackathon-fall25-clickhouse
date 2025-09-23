@@ -16,13 +16,12 @@ try:
     from clickhouse_driver import Client
 except ImportError as e:
     print(f"Missing required dependencies: {e}")
-    print("Install with: pip install scamper clickhouse-driver")
     sys.exit(1)
 
 
 class WartsClickHouseLoader:
-    def __init__(self, clickhouse_host: str = 'localhost', clickhouse_port: int = 9000):
-        self.client = Client(host=clickhouse_host, port=clickhouse_port)
+    def __init__(self, clickhouse_host: str = 'localhost', clickhouse_port: int = 9000, clickhouse_database: str = 'scamper'):
+        self.client = Client(host=clickhouse_host, port=clickhouse_port, database=clickhouse_database)
         self.ping_batch = []
         self.trace_batch = []
         self.trace_hops_batch = []
